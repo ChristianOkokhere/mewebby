@@ -70,6 +70,7 @@ a:visited{
 }
 em, i {
     font-style: italic;
+    opacity: 0.7;
 }
 header h1 {
   margin-bottom: 8px;
@@ -78,6 +79,10 @@ header h1 {
 header p {
   margin-top: 0;
   margin-bottom: 24px;
+}
+main p {
+    margin-top: 0;
+    margin-bottom: 24px;
 }
 strong, b {
     font-weight: 600;

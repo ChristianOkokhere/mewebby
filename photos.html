@@ -6,6 +6,9 @@
         <title>COK</title>
         <link rel="stylesheet" href="style.css">
         <link rel ="icon" href="favicon.svg" type="image/svg">
+        <link rel="preload" as="image" href="photos/Glacier/first.JPG">
+        <link rel="preload" as="image" href="photos/Glacier/seventh.JPG">
+        <link rel="preload" as="image" href="photos/Glacier/second.JPG">
     </head>
     <body>
    <header>
@@ -22,7 +25,7 @@
     <ul class="Photos"></ul>
     <div>
         <h4>Glacier-National-Park</h4>
-        <img src="photos/Glacier/first.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;">
+        <img src="photos/Glacier/first.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="eager" fetchpriority="high">
         <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
         <img src="photos/Glacier/seventh.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;">
         <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>

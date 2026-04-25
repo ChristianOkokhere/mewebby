@@ -51,8 +51,8 @@ optimize_directory() {
 
             echo "  - Optimizing $filename"
 
-            # Create WebP version (80% quality, good balance)
-            $CONVERT_CMD "$img" -quality 80 -define webp:method=6 "photos/optimized/$dir_name/${name}.webp"
+            # Create WebP version: cap width at 2000px, quality 78
+            $CONVERT_CMD "$img" -resize '2000x>' -quality 78 -define webp:method=6 "photos/optimized/$dir_name/${name}.webp"
 
             # Create responsive sizes (optional - uncomment if needed)
             # $CONVERT_CMD "$img" -resize 800x -quality 80 "photos/optimized/$dir_name/${name}-800w.webp"

@@ -78,6 +78,10 @@ if [ -d "photos/Spain" ]; then
     optimize_directory "photos/Spain"
 fi
 
+if [ -d "photos/Chinatown" ]; then
+    optimize_directory "photos/Chinatown"
+fi
+
 echo ""
 echo -e "${GREEN}✓ Optimization complete!${NC}"
 echo "Optimized images are in photos/optimized/"

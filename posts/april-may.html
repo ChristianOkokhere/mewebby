@@ -6,6 +6,27 @@
         <title>COK</title>
         <link rel="stylesheet" href="../style.css">
         <link rel ="icon" href="../favicon.svg" type="image/svg">
+        <style>
+            main img { cursor: zoom-in; }
+            #lightbox {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.92);
+                z-index: 1000;
+                cursor: zoom-out;
+                align-items: center;
+                justify-content: center;
+            }
+            #lightbox.open { display: flex; }
+            #lightbox img {
+                max-width: 94vw;
+                max-height: 94vh;
+                width: auto;
+                height: auto;
+                margin: 0;
+            }
+        </style>
     </head>
     <body>
    <header>
@@ -79,6 +100,32 @@
     </picture>
     <p style="color: #888; margin: 0; font-size: 14px;">NikonF3 w Kodak Tri-X 400, APR 2026</p>
    </main>
+   <div id="lightbox"><img alt="expanded photo"></div>
+   <script>
+     (function () {
+         var lb = document.getElementById('lightbox');
+         var lbImg = lb.querySelector('img');
+         document.querySelectorAll('main img').forEach(function (img) {
+             img.addEventListener('click', function () {
+                 var full = img.getAttribute('src');
+                 lbImg.src = img.currentSrc || img.src;
+                 lbImg.dataset.full = full;
+                 lb.classList.add('open');
+                 var hi = new Image();
+                 hi.onload = function () {
+                     if (lb.classList.contains('open') && lbImg.dataset.full === full) lbImg.src = full;
+                 };
+                 hi.src = full;
+             });
+         });
+         lb.addEventListener('click', function () {
+             lb.classList.remove('open');
+         });
+         document.addEventListener('keydown', function (e) {
+             if (e.key === 'Escape') lb.classList.remove('open');
+         });
+     })();
+   </script>
    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
    </body>
 </html>

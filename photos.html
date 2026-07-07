@@ -232,8 +232,15 @@
          var lbImg = lb.querySelector('img');
          document.querySelectorAll('main img').forEach(function (img) {
              img.addEventListener('click', function () {
+                 var full = img.getAttribute('src');
                  lbImg.src = img.currentSrc || img.src;
+                 lbImg.dataset.full = full;
                  lb.classList.add('open');
+                 var hi = new Image();
+                 hi.onload = function () {
+                     if (lb.classList.contains('open') && lbImg.dataset.full === full) lbImg.src = full;
+                 };
+                 hi.src = full;
              });
          });
          lb.addEventListener('click', function () {

@@ -6,7 +6,27 @@
         <title>COK</title>
         <link rel="stylesheet" href="style.css">
         <link rel ="icon" href="favicon.svg" type="image/svg">
-        <link rel="preload" as="image" href="photos/Glacier/first.JPG">
+        <style>
+            main img { cursor: zoom-in; }
+            #lightbox {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.92);
+                z-index: 1000;
+                cursor: zoom-out;
+                align-items: center;
+                justify-content: center;
+            }
+            #lightbox.open { display: flex; }
+            #lightbox img {
+                max-width: 94vw;
+                max-height: 94vh;
+                width: auto;
+                height: auto;
+                margin: 0;
+            }
+        </style>
     </head>
     <body>
    <header>
@@ -20,196 +40,210 @@
     </nav>
    </header>
    <main>
-    <ul class="Photos"></ul>
-    <div>
-        <p style="margin-bottom: 8px;">Most Recent Rolls</p>
-        <a href="posts/june-july.html">June-July</a>
-        <a href="posts/may-june.html" style="margin-left: 16px;">May-June</a>
-        <a href="posts/april-may.html" style="margin-left: 16px;">April-May</a>
-        <a href="posts/march-april.html" style="margin-left: 16px;">March-April</a>
-        <h4>Glacier-National-Park</h4>
+    <div style="text-align: center; margin-bottom: 48px;">
         <picture>
-            <source srcset="photos/optimized/Glacier/first.webp" type="image/webp">
-            <img src="photos/Glacier/first.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="eager" fetchpriority="high">
+            <source id="hero-webp" type="image/webp">
+            <img id="hero-img" alt="random landscape photo" style="display: block; margin: 0 auto; max-width: 100%; max-height: 70vh; width: auto;" loading="eager" fetchpriority="high">
         </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
-        <details>
-            <summary style="cursor: pointer; padding: 8px 0; color: #555;">See more</summary>
-        <picture>
-            <source srcset="photos/optimized/Glacier/seventh.webp" type="image/webp">
-            <img src="photos/Glacier/seventh.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Glacier/second.webp" type="image/webp">
-            <img src="photos/Glacier/second.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Glacier/eigth.webp" type="image/webp">
-            <img src="photos/Glacier/eigth.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Glacier/nine.webp" type="image/webp">
-            <img src="photos/Glacier/nine.JPG" alt="pic-from-glacier" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUL 2025</p>
-        </details>
+        <p style="color: #888; margin: 8px 0 0; font-size: 14px;">
+            <span id="hero-stats"></span> &mdash; <a id="hero-link" href="#"></a>
+        </p>
     </div>
+    <script>
+        var WEEK_PAGES = [
+            "posts/week-1.html",
+            "posts/week-2.html",
+            "posts/week-3.html",
+            "posts/week-4.html",
+            "posts/march-april.html",
+            "posts/april-may.html",
+            "posts/may-june.html",
+            "posts/may-june-2.html",
+            "posts/june-july.html",
+            "posts/week-10.html",
+            "posts/week-11.html"
+        ];
+        // landscape photos only: [src, stats, week]
+        var PHOTOS = [
+            ["photos/Spain/spain1(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
+            ["photos/Spain/spain2(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
+            ["photos/Spain/spain3(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
+            ["photos/Spain/spain5(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
+            ["photos/Spain/spain6(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
+            ["photos/Glacier/first.JPG","ContaxRX w Ektar100, JUL 2025",2],
+            ["photos/Glacier/seventh.JPG","ContaxRX w Ektar100, JUL 2025",2],
+            ["photos/Glacier/second.JPG","ContaxRX w Ektar100, JUL 2025",2],
+            ["photos/Glacier/eigth.JPG","ContaxRX w Ektar100, JUL 2025",2],
+            ["photos/Glacier/nine.JPG","ContaxRX w Ektar100, JUL 2025",2],
+            ["photos/Seattle/seattle4.jpg","Fujifilm x100vi, NOV 2025",3],
+            ["photos/Seattle/seattle5.jpg","Fujifilm x100vi, NOV 2025",3],
+            ["photos/Seattle/seattle12.JPG","Fujifilm x100vi, DEC 2025",3],
+            ["photos/Seattle/seattle7 2.JPG","Fujifilm x100vi, DEC 2025",3],
+            ["photos/Seattle/seattle11.JPG","Fujifilm x100vi, DEC 2025",3],
+            ["photos/Seattle/seattle1.jpg","Fujifilm x100vi, NOV 2025",3],
+            ["photos/Seattle/seattle2(1).jpg","Fujifilm x100vi, NOV 2025",3],
+            ["photos/Chinatown/DSCF0247.jpg","Fujifilm x100vi, APR 2026",4],
+            ["photos/SF/SF14(1).jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/SF115(1).jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/SF10(1).jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/SF12(1).jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/SF16(1).jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/SF18.jpg","Fujifilm x100vi, JAN 2026",4],
+            ["photos/SF/sf5..jpg","Fujifilm x100vi, DEC 2025",4],
+            ["photos/SF/sf1.jpg","ContaxRX w Ektar100, JUN 2025",4],
+            ["photos/Madrid/madrid8.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid1.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid3.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid11.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid2.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid4.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid10.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid6.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid5.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/Madrid/madrid12.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
+            ["photos/NikonF3/IMG_0403.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0401.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0405.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0434.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0419.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0406.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0424.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0407.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/NikonF3/IMG_0421.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
+            ["photos/Digital/Street2.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/Street1.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0291.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0293.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0295.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0298.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0302.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0308.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0288.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0301.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0310.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0277.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/Street3.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0300.jpg","Fujifilm x100vi, MAY 2026",7],
+            ["photos/Digital/DSCF0389.jpg","Fujifilm x100vi, MAY 2026",8],
+            ["photos/Digital/DSCF0380.jpg","Fujifilm x100vi, MAY 2026",8],
+            ["photos/Digital/DSCF0393.jpg","Fujifilm x100vi, MAY 2026",8],
+            ["photos/Digital/DSCF0367.jpg","Fujifilm x100vi, MAY 2026",8],
+            ["photos/Digital/DSCF0381.jpg","Fujifilm x100vi, MAY 2026",8],
+            ["photos/BigSur/bigsur2.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur4.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur6.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur8.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur9.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur10.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/BigSur/bigsur5.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro1.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro2.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro3.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro5.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro6.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Morro/morro4.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/CalCoast/calcoast1.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/CalCoast/calcoast4.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/CalCoast/calcoast3.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/CalCoast/calcoast14.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/HMB/hmb1.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/HMB/hmb2.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/HMB/hmb3.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/HMB/hmb4.jpg","NikonF3 w Kodak160, MAY 2026",9],
+            ["photos/Street/street1.jpg","NikonF3 w Kodak160, MAY 2026",10],
+            ["photos/Street/street2.jpg","NikonF3 w Kodak160, MAY 2026",10],
+            ["photos/Street/street3.jpg","NikonF3 w Kodak160, MAY 2026",10],
+            ["photos/Street/street4.jpg","NikonF3 w Kodak160, MAY 2026",10],
+            ["photos/ChinatownJune/ct-june1.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june2.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june11.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june8.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june9.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june3.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june7.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june10.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june5.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june13.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june6.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/ChinatownJune/ct-june12.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws1.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws2.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws3.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws7.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws4.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws9.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws8.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws5.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WashingtonSquare/ws6.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race16.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race4.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race5.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race6.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race19.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race20.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race10.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race1.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race21.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race18.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race11.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race15.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race17.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race12.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race3.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race7.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race9.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race8.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race22.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race13.jpg","Fujifilm x100vi, JUNE 2026",11],
+            ["photos/WaitersRace/race14.jpg","Fujifilm x100vi, JUNE 2026",11]
+        ];
+        (function () {
+            var p = PHOTOS[Math.floor(Math.random() * PHOTOS.length)];
+            document.getElementById('hero-webp').srcset =
+                p[0].replace('photos/', 'photos/optimized/').replace(/\.[^.]+$/, '.webp');
+            document.getElementById('hero-img').src = p[0];
+            document.getElementById('hero-stats').textContent = p[1];
+            var link = document.getElementById('hero-link');
+            link.textContent = 'Week ' + p[2];
+            link.href = WEEK_PAGES[p[2] - 1];
+        })();
+    </script>
     <div>
-        <h4>San Francisco</h4>
-        <picture>
-            <source srcset="photos/optimized/Chinatown/DSCF0247.webp" type="image/webp">
-            <img src="photos/Chinatown/DSCF0247.jpg" alt="pic-from-Chinatown" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, APR 2026</p>
-        <details>
-            <summary style="cursor: pointer; padding: 8px 0; color: #555;">See more</summary>
-        <picture>
-            <source srcset="photos/optimized/SF/SF14(1).webp" type="image/webp">
-            <img src="photos/SF/SF14(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF115(1).webp" type="image/webp">
-            <img src="photos/SF/SF115(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF10(1).webp" type="image/webp">
-            <img src="photos/SF/SF10(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF12(1).webp" type="image/webp">
-            <img src="photos/SF/SF12(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF16(1).webp" type="image/webp">
-            <img src="photos/SF/SF16(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF17(1).webp" type="image/webp">
-            <img src="photos/SF/SF17(1).jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/SF18.webp" type="image/webp">
-            <img src="photos/SF/SF18.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, JAN 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/sf5..webp" type="image/webp">
-            <img src="photos/SF/sf5..jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, DEC 2025</p>
-        <picture>
-            <source srcset="photos/optimized/SF/sf4.webp" type="image/webp">
-            <img src="photos/SF/sf4.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, DEC 2025</p>
-        <picture>
-            <source srcset="photos/optimized/SF/sf2.webp" type="image/webp">
-            <img src="photos/SF/sf2.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUN 2025</p>
-        <picture>
-            <source srcset="photos/optimized/SF/sf1.webp" type="image/webp">
-            <img src="photos/SF/sf1.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">ContaxRX w Ektar100, JUN 2025</p>
-        <picture>
-            <source srcset="photos/optimized/SF/DSCF0207.webp" type="image/webp">
-            <img src="photos/SF/DSCF0207.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, MAY 2026</p>
-        <picture>
-            <source srcset="photos/optimized/SF/DSCF0210.webp" type="image/webp">
-            <img src="photos/SF/DSCF0210.jpg" alt="pic-from-SF" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, MAY 2026</p>
-        </details>
-    </div>
-    <div>
-        <h4>Seattle</h4>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle4.webp" type="image/webp">
-            <img src="photos/Seattle/seattle4.jpg" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, NOV 2025</p>
-        <details>
-            <summary style="cursor: pointer; padding: 8px 0; color: #555;">See more</summary>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle5.webp" type="image/webp">
-            <img src="photos/Seattle/seattle5.jpg" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, NOV 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle12.webp" type="image/webp">
-            <img src="photos/Seattle/seattle12.JPG" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, DEC 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle7 2.webp" type="image/webp">
-            <img src="photos/Seattle/seattle7 2.JPG" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, DEC 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle11.webp" type="image/webp">
-            <img src="photos/Seattle/seattle11.JPG" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, DEC 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle1.webp" type="image/webp">
-            <img src="photos/Seattle/seattle1.jpg" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">Fujifilm x100vi, NOV 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Seattle/seattle2(1).webp" type="image/webp">
-            <img src="photos/Seattle/seattle2(1).jpg" alt="pic-from-Seattle" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        </details>
-    </div>
-    <div>
-        <h4>Spain</h4>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain1(1).webp" type="image/webp">
-            <img src="photos/Spain/spain1(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        <details>
-            <summary style="cursor: pointer; padding: 8px 0; color: #555;">See more</summary>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain2(1).webp" type="image/webp">
-            <img src="photos/Spain/spain2(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain3(1).webp" type="image/webp">
-            <img src="photos/Spain/spain3(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain4(1).webp" type="image/webp">
-            <img src="photos/Spain/spain4(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain5(1).webp" type="image/webp">
-            <img src="photos/Spain/spain5(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        <picture>
-            <source srcset="photos/optimized/Spain/spain6(1).webp" type="image/webp">
-            <img src="photos/Spain/spain6(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
-        </picture>
-        <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
-        </details>
+        <p style="margin-bottom: 8px;">Recent Photos</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px 16px;">
+            <a href="posts/week-11.html">Week 11</a>
+            <a href="posts/week-10.html">Week 10</a>
+            <a href="posts/june-july.html">Week 9</a>
+            <a href="posts/may-june-2.html">Week 8</a>
+            <a href="posts/may-june.html">Week 7</a>
+            <a href="posts/april-may.html">Week 6</a>
+            <a href="posts/march-april.html">Week 5</a>
+            <a href="posts/week-4.html">Week 4</a>
+            <a href="posts/week-3.html">Week 3</a>
+            <a href="posts/week-2.html">Week 2</a>
+            <a href="posts/week-1.html">Week 1</a>
+        </div>
     </div>
    </main>
+   <div id="lightbox"><img alt="expanded photo"></div>
+   <script>
+     (function () {
+         var lb = document.getElementById('lightbox');
+         var lbImg = lb.querySelector('img');
+         document.querySelectorAll('main img').forEach(function (img) {
+             img.addEventListener('click', function () {
+                 lbImg.src = img.currentSrc || img.src;
+                 lb.classList.add('open');
+             });
+         });
+         lb.addEventListener('click', function () {
+             lb.classList.remove('open');
+         });
+         document.addEventListener('keydown', function (e) {
+             if (e.key === 'Escape') lb.classList.remove('open');
+         });
+     })();
+   </script>
    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
    </body>
 </html>

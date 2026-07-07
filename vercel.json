@@ -1,0 +1,6 @@
+{
+  "redirects": [
+    { "source": "/posts/june-july-2.html", "destination": "/posts/week-11.html", "permanent": true },
+    { "source": "/posts/june-july-3.html", "destination": "/posts/week-10.html", "permanent": true }
+  ]
+}

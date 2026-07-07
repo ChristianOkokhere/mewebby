@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title>COK</title>
+        <link rel="stylesheet" href="../style.css">
+        <link rel ="icon" href="../favicon.svg" type="image/svg">
+        <style>
+            main img { cursor: zoom-in; }
+            #lightbox {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.92);
+                z-index: 1000;
+                cursor: zoom-out;
+                align-items: center;
+                justify-content: center;
+            }
+            #lightbox.open { display: flex; }
+            #lightbox img {
+                max-width: 94vw;
+                max-height: 94vh;
+                width: auto;
+                height: auto;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+   <header>
+        <h1>COK</h1>
+        <p>(<strong>C</strong>hristian <strong>OK</strong>okhere)</p>
+    <nav>
+        <a href="/">Home</a>
+        <a href="../blog.html">Blog</a>
+        <a href="../photos.html">Photos</a>
+        <a href="../random.html">Spins and Flips</a>
+    </nav>
+   </header>
+   <main>
+    <h1>Week 1</h1>
+    <p>
+        <time datetime="2025-05-01">May 2025</time>
+    </p>
+    <h4>Spain</h4>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain1(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain1(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain2(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain2(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain3(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain3(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain4(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain4(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain5(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain5(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+    <picture>
+        <source srcset="../photos/optimized/Spain/spain6(1).webp" type="image/webp">
+        <img src="../photos/Spain/spain6(1).jpg" alt="pic-from-Spain" style="display: block; margin-bottom: 0;" loading="lazy">
+    </picture>
+    <p style="color: #888; margin: 0; font-size: 14px;">CanonSureShot90u w Kodak400Ultramax, MAY 2025</p>
+   </main>
+   <div id="lightbox"><img alt="expanded photo"></div>
+   <script>
+     (function () {
+         var lb = document.getElementById('lightbox');
+         var lbImg = lb.querySelector('img');
+         document.querySelectorAll('main img').forEach(function (img) {
+             img.addEventListener('click', function () {
+                 lbImg.src = img.currentSrc || img.src;
+                 lb.classList.add('open');
+             });
+         });
+         lb.addEventListener('click', function () {
+             lb.classList.remove('open');
+         });
+         document.addEventListener('keydown', function (e) {
+             if (e.key === 'Escape') lb.classList.remove('open');
+         });
+     })();
+   </script>
+   <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+   </body>
+</html>

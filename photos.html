@@ -69,6 +69,10 @@
             .slot.picked b { display: block; }
             /* cut mode: open photos.html?cut, click photos to mark them for removal */
             .slot.cut img { opacity: 0.15; outline: 3px solid #d00; outline-offset: -3px; }
+            /* hero mode: open photos.html?hero, click the photos allowed to be the large one */
+            body.hero .slot img { opacity: 0.35; }
+            body.hero .slot.hero img { opacity: 1; outline: 4px solid #1a7f37; outline-offset: -4px; }
+            body.hero .slot.vertical img { opacity: 0.1; cursor: not-allowed; }
             #orderbar {
                 display: none;
                 position: fixed;
@@ -85,7 +89,7 @@
                 align-items: center;
                 white-space: nowrap;
             }
-            body.order #orderbar, body.cut #orderbar { display: flex; }
+            body.order #orderbar, body.cut #orderbar, body.hero #orderbar { display: flex; }
             #orderbar button {
                 font: inherit;
                 background: #fff;
@@ -119,7 +123,7 @@
         </p>
     </div>
     <script>
-        // hero picks one of these at random (never a vertical): [src, stats]
+        // hero picks one of these at random (hand-picked, never a vertical): [src, stats]
         var PHOTOS = [
             ["photos/gallery/20260708-img-1109-2.webp","Film, JUL 2026"],
             ["photos/gallery/20260708-001076580020-19.webp","Film, JUL 2026"],
@@ -127,57 +131,37 @@
             ["photos/gallery/20261013-001076560009-7a.webp","Film, OCT 2026"],
             ["photos/gallery/20261013-001076560018-16a.webp","Film, OCT 2026"],
             ["photos/gallery/20260708-img-1118-2.webp","Film, JUL 2026"],
-            ["photos/gallery/20260703-img-1020-2.webp","JUL 2026"],
             ["photos/gallery/20260704-img-1044-2.webp","JUL 2026"],
             ["photos/gallery/20261013-001076580029-28.webp","Film, OCT 2026"],
-            ["photos/gallery/20260708-img-1386.webp","Film, JUL 2026"],
-            ["photos/gallery/20260704-img-1067-2.webp","JUL 2026"],
             ["photos/gallery/20260708-img-1120.webp","Film, JUL 2026"],
             ["photos/gallery/20260708-001076510008-9a.webp","Film, JUL 2026"],
-            ["photos/gallery/20260708-img-1182-2-1.webp","Film, JUL 2026"],
             ["photos/gallery/20260708-img-1384-2.webp","Film, JUL 2026"],
             ["photos/gallery/20260708-img-1119-2.webp","Film, JUL 2026"],
-            ["photos/gallery/20260708-img-1381.webp","Film, JUL 2026"],
-            ["photos/gallery/20260708-img-1383.webp","Film, JUL 2026"],
             ["photos/gallery/20260607-ct-june1.webp","Fujifilm x100vi, JUNE 2026"],
             ["photos/gallery/20260607-ct-june2.webp","Fujifilm x100vi, JUNE 2026"],
             ["photos/gallery/20260615-ct-june3.webp","Fujifilm x100vi, JUNE 2026"],
             ["photos/gallery/20260607-ct-june11.webp","Fujifilm x100vi, JUNE 2026"],
-            ["photos/gallery/20261013-001076530030-30a.webp","Film, OCT 2026"],
             ["photos/gallery/20260517-dscf0301.webp","Fujifilm x100vi, MAY 2026"],
-            ["photos/gallery/20260517-dscf0298.webp","Fujifilm x100vi, MAY 2026"],
             ["photos/gallery/20260517-dscf0308.webp","Fujifilm x100vi, MAY 2026"],
             ["photos/gallery/20260930-image-69.webp","SEP 2026"],
             ["photos/gallery/20260930-image-70.webp","SEP 2026"],
             ["photos/gallery/20261031-dscf1102.webp","Fujifilm x100vi, OCT 2026"],
+            ["photos/gallery/20260517-dscf0298.webp","Fujifilm x100vi, MAY 2026"],
             ["photos/gallery/20261101-image-2027.webp","Fujifilm x100vi, NOV 2026"],
-            ["photos/gallery/20260607-ct-june10.webp","Fujifilm x100vi, JUNE 2026"],
-            ["photos/gallery/20260525-dscf0380.webp","Fujifilm x100vi, MAY 2026"],
-            ["photos/gallery/20260525-dscf0389.webp","Fujifilm x100vi, MAY 2026"],
             ["photos/gallery/20261024-dscf0965-1.webp","Fujifilm x100vi, OCT 2026"],
-            ["photos/gallery/20260607-race6.webp","Fujifilm x100vi, JUNE 2026"],
-            ["photos/gallery/20260607-race3.webp","Fujifilm x100vi, JUNE 2026"],
-            ["photos/gallery/20251115-seattle2-1.webp","Fujifilm x100vi, NOV 2025"],
             ["photos/gallery/20261013-image-88.webp","OCT 2026"],
-            ["photos/gallery/20261013-image-89.webp","OCT 2026"],
-            ["photos/gallery/20261013-image-93.webp","OCT 2026"],
             ["photos/gallery/20260930-image-77.webp","SEP 2026"],
             ["photos/gallery/20261101-dscf1169.webp","Fujifilm x100vi, NOV 2026"],
-            ["photos/gallery/20261003-dscf0836.webp","Fujifilm x100vi, OCT 2026"],
+            ["photos/gallery/20261013-image-93.webp","OCT 2026"],
             ["photos/gallery/20260815-img-1671-2.webp","AUG 2026"],
             ["photos/gallery/20260815-img-1672-2.webp","AUG 2026"],
             ["photos/gallery/20251115-seattle5.webp","Fujifilm x100vi, NOV 2025"],
-            ["photos/gallery/20260515-bigsur4.webp","CanonSureShot90u w Kodak160, MAY 2026"],
-            ["photos/gallery/20260515-bigsur2.webp","CanonSureShot90u w Kodak160, MAY 2026"],
-            ["photos/gallery/20260623-image-54.webp","JUN 2026"],
-            ["photos/gallery/20250515-spain3-1.webp","CanonSureShot90u w Kodak400Ultramax, MAY 2025"],
-            ["photos/gallery/20260515-morro1.webp","NikonF3 w Kodak160, MAY 2026"],
-            ["photos/gallery/20260515-hmb1.webp","NikonF3 w Kodak160, MAY 2026"],
-            ["photos/gallery/20260515-calcoast3.webp","NikonF3 w Kodak160, MAY 2026"],
-            ["photos/gallery/20250515-spain1-1.webp","CanonSureShot90u w Kodak400Ultramax, MAY 2025"],
-            ["photos/gallery/20250515-spain2-1.webp","CanonSureShot90u w Kodak400Ultramax, MAY 2025"],
-            ["photos/gallery/20250715-first.webp","ContaxRX w Ektar100, JUL 2025"],
             ["photos/gallery/20261025-dscf0992.webp","Fujifilm x100vi, OCT 2026"],
+            ["photos/gallery/20250515-spain3-1.webp","CanonSureShot90u w Kodak400Ultramax, MAY 2025"],
+            ["photos/gallery/20251115-seattle2-1.webp","Fujifilm x100vi, NOV 2025"],
+            ["photos/gallery/20260607-race3.webp","Fujifilm x100vi, JUNE 2026"],
+            ["photos/gallery/20260525-dscf0380.webp","Fujifilm x100vi, MAY 2026"],
+            ["photos/gallery/20260704-img-1067-2.webp","JUL 2026"],
         ];
         (function () {
             var p = PHOTOS[Math.floor(Math.random() * PHOTOS.length)];
@@ -275,26 +259,27 @@
              var t = thumbs[current];
              show(t.dataset.webp, t.dataset.full, t.dataset.caption);
          }
-         var mode = /[?&]order\b/.test(location.search) ? 'order' : /[?&]cut\b/.test(location.search) ? 'cut' : '';
+         var mode = (location.search.match(/[?&](order|cut|hero)\b/) || [])[1] || '';
          var ordering = mode !== '';
          var KEY = 'photos-' + mode;
          var seq = [];
          function drawOrder() {
              thumbs.forEach(function (t) {
                  var n = seq.indexOf(t.dataset.id);
-                 t.parentNode.classList.toggle(mode === 'order' ? 'picked' : 'cut', n >= 0);
+                 t.parentNode.classList.toggle(mode === 'order' ? 'picked' : mode, n >= 0);
                  t.parentNode.querySelector('b').textContent = n + 1;
              });
              document.getElementById('ordercount').textContent = mode === 'order'
                  ? seq.length + ' of ' + thumbs.length + ' ordered'
-                 : seq.length + ' marked to cut';
+                 : mode === 'cut' ? seq.length + ' marked to cut'
+                 : seq.length + ' picked for the large photo';
              try { localStorage.setItem(KEY, JSON.stringify(seq)); } catch (e) {}
          }
          if (ordering) {
              document.body.classList.add(mode);
              thumbs.forEach(function (t) {
                  var slot = document.createElement('div');
-                 slot.className = 'slot';
+                 slot.className = +t.getAttribute('width') < +t.getAttribute('height') ? 'slot vertical' : 'slot';
                  t.parentNode.insertBefore(slot, t);
                  slot.appendChild(t);
                  slot.appendChild(document.createElement('b'));
@@ -317,6 +302,8 @@
          thumbs.forEach(function (t, i) {
              t.addEventListener('click', function () {
                  if (!ordering) return showThumb(i);
+                 // verticals can never be the large photo
+                 if (mode === 'hero' && +t.getAttribute('width') < +t.getAttribute('height')) return;
                  var n = seq.indexOf(t.dataset.id);
                  if (n >= 0) seq.splice(n, 1); else seq.push(t.dataset.id);
                  drawOrder();

@@ -21,10 +21,77 @@
             #lightbox.open { display: flex; }
             #lightbox img {
                 max-width: 94vw;
-                max-height: 94vh;
+                max-height: 88vh;
                 width: auto;
                 height: auto;
                 margin: 0;
+            }
+            #lightbox { flex-direction: column; }
+            #lightbox p {
+                color: #aaa;
+                font-size: 14px;
+                margin: 10px 0 0;
+            }
+            #grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+                align-items: center;
+            }
+            #grid img {
+                display: block;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                background: #e6e6e6;
+            }
+            /* order mode: open photos.html?order, click photos in the order you want them */
+            .slot { position: relative; }
+            .slot img { cursor: pointer; }
+            .slot.picked img { opacity: 0.45; }
+            .slot b {
+                display: none;
+                position: absolute;
+                top: 8px;
+                left: 8px;
+                min-width: 30px;
+                height: 30px;
+                padding: 0 8px;
+                border-radius: 15px;
+                background: #222;
+                color: #fff;
+                font-size: 15px;
+                line-height: 30px;
+                text-align: center;
+            }
+            .slot.picked b { display: block; }
+            /* cut mode: open photos.html?cut, click photos to mark them for removal */
+            .slot.cut img { opacity: 0.15; outline: 3px solid #d00; outline-offset: -3px; }
+            #orderbar {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #222;
+                color: #fff;
+                padding: 10px 18px;
+                border-radius: 999px;
+                font-size: 15px;
+                z-index: 900;
+                gap: 12px;
+                align-items: center;
+                white-space: nowrap;
+            }
+            body.order #orderbar, body.cut #orderbar { display: flex; }
+            #orderbar button {
+                font: inherit;
+                background: #fff;
+                color: #222;
+                border: 0;
+                border-radius: 999px;
+                padding: 3px 14px;
+                cursor: pointer;
             }
         </style>
     </head>
@@ -46,208 +113,300 @@
             <img id="hero-img" alt="random landscape photo" style="display: block; margin: 0 auto; max-width: 100%; max-height: 70vh; width: auto;" loading="eager" fetchpriority="high">
         </picture>
         <p style="color: #888; margin: 8px 0 0; font-size: 14px;">
-            <span id="hero-stats"></span> &mdash; <a id="hero-link" href="#"></a>
+            <span id="hero-stats"></span>
         </p>
     </div>
     <script>
-        var WEEK_PAGES = [
-            "posts/week-1.html",
-            "posts/week-2.html",
-            "posts/week-3.html",
-            "posts/week-4.html",
-            "posts/march-april.html",
-            "posts/april-may.html",
-            "posts/may-june.html",
-            "posts/may-june-2.html",
-            "posts/june-july.html",
-            "posts/week-10.html",
-            "posts/week-11.html"
-        ];
-        // landscape photos only: [src, stats, week]
+        // hero photo(s): [src, stats]
         var PHOTOS = [
-            ["photos/Spain/spain1(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
-            ["photos/Spain/spain2(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
-            ["photos/Spain/spain3(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
-            ["photos/Spain/spain5(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
-            ["photos/Spain/spain6(1).jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",1],
-            ["photos/Glacier/first.JPG","ContaxRX w Ektar100, JUL 2025",2],
-            ["photos/Glacier/seventh.JPG","ContaxRX w Ektar100, JUL 2025",2],
-            ["photos/Glacier/second.JPG","ContaxRX w Ektar100, JUL 2025",2],
-            ["photos/Glacier/eigth.JPG","ContaxRX w Ektar100, JUL 2025",2],
-            ["photos/Glacier/nine.JPG","ContaxRX w Ektar100, JUL 2025",2],
-            ["photos/Seattle/seattle4.jpg","Fujifilm x100vi, NOV 2025",3],
-            ["photos/Seattle/seattle5.jpg","Fujifilm x100vi, NOV 2025",3],
-            ["photos/Seattle/seattle12.JPG","Fujifilm x100vi, DEC 2025",3],
-            ["photos/Seattle/seattle7 2.JPG","Fujifilm x100vi, DEC 2025",3],
-            ["photos/Seattle/seattle11.JPG","Fujifilm x100vi, DEC 2025",3],
-            ["photos/Seattle/seattle1.jpg","Fujifilm x100vi, NOV 2025",3],
-            ["photos/Seattle/seattle2(1).jpg","Fujifilm x100vi, NOV 2025",3],
-            ["photos/Chinatown/DSCF0247.jpg","Fujifilm x100vi, APR 2026",4],
-            ["photos/SF/SF14(1).jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/SF115(1).jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/SF10(1).jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/SF12(1).jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/SF16(1).jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/SF18.jpg","Fujifilm x100vi, JAN 2026",4],
-            ["photos/SF/sf5..jpg","Fujifilm x100vi, DEC 2025",4],
-            ["photos/SF/sf1.jpg","ContaxRX w Ektar100, JUN 2025",4],
-            ["photos/Madrid/madrid8.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid1.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid3.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid11.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid2.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid4.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid10.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid6.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid5.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/Madrid/madrid12.jpg","CanonSureShot90u w Kodak400Ultramax, MAY 2025",5],
-            ["photos/NikonF3/IMG_0403.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0401.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0405.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0434.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0419.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0406.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0424.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0407.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/NikonF3/IMG_0421.jpg","NikonF3 w Kodak Tri-X 400, APR 2026",6],
-            ["photos/Digital/Street2.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/Street1.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0291.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0293.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0295.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0298.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0302.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0308.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0288.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0301.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0310.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0277.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/Street3.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0300.jpg","Fujifilm x100vi, MAY 2026",7],
-            ["photos/Digital/DSCF0389.jpg","Fujifilm x100vi, MAY 2026",8],
-            ["photos/Digital/DSCF0380.jpg","Fujifilm x100vi, MAY 2026",8],
-            ["photos/Digital/DSCF0393.jpg","Fujifilm x100vi, MAY 2026",8],
-            ["photos/Digital/DSCF0367.jpg","Fujifilm x100vi, MAY 2026",8],
-            ["photos/Digital/DSCF0381.jpg","Fujifilm x100vi, MAY 2026",8],
-            ["photos/BigSur/bigsur2.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur4.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur6.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur8.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur9.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur10.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/BigSur/bigsur5.jpg","CanonSureShot90u w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro1.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro2.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro3.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro5.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro6.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Morro/morro4.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/CalCoast/calcoast1.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/CalCoast/calcoast4.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/CalCoast/calcoast3.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/CalCoast/calcoast14.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/HMB/hmb1.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/HMB/hmb2.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/HMB/hmb3.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/HMB/hmb4.jpg","NikonF3 w Kodak160, MAY 2026",9],
-            ["photos/Street/street1.jpg","NikonF3 w Kodak160, MAY 2026",10],
-            ["photos/Street/street2.jpg","NikonF3 w Kodak160, MAY 2026",10],
-            ["photos/Street/street3.jpg","NikonF3 w Kodak160, MAY 2026",10],
-            ["photos/Street/street4.jpg","NikonF3 w Kodak160, MAY 2026",10],
-            ["photos/ChinatownJune/ct-june1.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june2.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june11.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june8.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june9.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june3.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june7.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june10.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june5.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june13.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june6.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/ChinatownJune/ct-june12.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws1.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws2.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws3.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws7.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws4.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws9.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws8.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws5.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WashingtonSquare/ws6.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race16.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race4.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race5.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race6.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race19.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race20.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race10.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race1.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race21.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race18.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race11.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race15.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race17.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race12.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race3.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race7.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race9.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race8.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race22.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race13.jpg","Fujifilm x100vi, JUNE 2026",11],
-            ["photos/WaitersRace/race14.jpg","Fujifilm x100vi, JUNE 2026",11]
+            ["photos/gallery/20260708-img-1109-2.webp","Film, JUL 2026"],
         ];
         (function () {
             var p = PHOTOS[Math.floor(Math.random() * PHOTOS.length)];
-            document.getElementById('hero-webp').srcset =
-                p[0].replace('photos/', 'photos/optimized/').replace(/\.[^.]+$/, '.webp');
+            document.getElementById('hero-webp').srcset = p[0];
             document.getElementById('hero-img').src = p[0];
             document.getElementById('hero-stats').textContent = p[1];
-            var link = document.getElementById('hero-link');
-            link.textContent = 'Week ' + p[2];
-            link.href = WEEK_PAGES[p[2] - 1];
         })();
     </script>
-    <div>
-        <p style="margin-bottom: 8px;">Recent Photos</p>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px 16px;">
-            <a href="posts/week-11.html">Week 11</a>
-            <a href="posts/week-10.html">Week 10</a>
-            <a href="posts/june-july.html">Week 9</a>
-            <a href="posts/may-june-2.html">Week 8</a>
-            <a href="posts/may-june.html">Week 7</a>
-            <a href="posts/april-may.html">Week 6</a>
-            <a href="posts/march-april.html">Week 5</a>
-            <a href="posts/week-4.html">Week 4</a>
-            <a href="posts/week-3.html">Week 3</a>
-            <a href="posts/week-2.html">Week 2</a>
-            <a href="posts/week-1.html">Week 1</a>
-        </div>
+    <div id="grid">
+            <img src="photos/gallery/thumbs/20260708-img-1109-2.webp" data-webp="photos/gallery/20260708-img-1109-2.webp" data-full="photos/gallery/20260708-img-1109-2.webp" data-id="20260708-img-1109-2" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076580020-19.webp" data-webp="photos/gallery/20260708-001076580020-19.webp" data-full="photos/gallery/20260708-001076580020-19.webp" data-id="20260708-001076580020-19" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1115-2.webp" data-webp="photos/gallery/20260708-img-1115-2.webp" data-full="photos/gallery/20260708-img-1115-2.webp" data-id="20260708-img-1115-2" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076570035-33.webp" data-webp="photos/gallery/20261013-001076570035-33.webp" data-full="photos/gallery/20261013-001076570035-33.webp" data-id="20261013-001076570035-33" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076560009-7a.webp" data-webp="photos/gallery/20261013-001076560009-7a.webp" data-full="photos/gallery/20261013-001076560009-7a.webp" data-id="20261013-001076560009-7a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076560018-16a.webp" data-webp="photos/gallery/20261013-001076560018-16a.webp" data-full="photos/gallery/20261013-001076560018-16a.webp" data-id="20261013-001076560018-16a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076580014-13.webp" data-webp="photos/gallery/20261013-001076580014-13.webp" data-full="photos/gallery/20261013-001076580014-13.webp" data-id="20261013-001076580014-13" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1118-2.webp" data-webp="photos/gallery/20260708-img-1118-2.webp" data-full="photos/gallery/20260708-img-1118-2.webp" data-id="20260708-img-1118-2" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1044-2.webp" data-webp="photos/gallery/20260704-img-1044-2.webp" data-full="photos/gallery/20260704-img-1044-2.webp" data-id="20260704-img-1044-2" data-caption="JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076580010-9.webp" data-webp="photos/gallery/20261013-001076580010-9.webp" data-full="photos/gallery/20261013-001076580010-9.webp" data-id="20261013-001076580010-9" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1041-2.webp" data-webp="photos/gallery/20260704-img-1041-2.webp" data-full="photos/gallery/20260704-img-1041-2.webp" data-id="20260704-img-1041-2" data-caption="JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076580005-4.webp" data-webp="photos/gallery/20261013-001076580005-4.webp" data-full="photos/gallery/20261013-001076580005-4.webp" data-id="20261013-001076580005-4" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076580029-28.webp" data-webp="photos/gallery/20261013-001076580029-28.webp" data-full="photos/gallery/20261013-001076580029-28.webp" data-id="20261013-001076580029-28" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260703-img-1019-2.webp" data-webp="photos/gallery/20260703-img-1019-2.webp" data-full="photos/gallery/20260703-img-1019-2.webp" data-id="20260703-img-1019-2" data-caption="JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1386.webp" data-webp="photos/gallery/20260708-img-1386.webp" data-full="photos/gallery/20260708-img-1386.webp" data-id="20260708-img-1386" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076580032-31.webp" data-webp="photos/gallery/20261013-001076580032-31.webp" data-full="photos/gallery/20261013-001076580032-31.webp" data-id="20261013-001076580032-31" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260703-img-1020-2.webp" data-webp="photos/gallery/20260703-img-1020-2.webp" data-full="photos/gallery/20260703-img-1020-2.webp" data-id="20260703-img-1020-2" data-caption="JUL 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1069-2.webp" data-webp="photos/gallery/20260704-img-1069-2.webp" data-full="photos/gallery/20260704-img-1069-2.webp" data-id="20260704-img-1069-2" data-caption="JUL 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1070-2.webp" data-webp="photos/gallery/20260704-img-1070-2.webp" data-full="photos/gallery/20260704-img-1070-2.webp" data-id="20260704-img-1070-2" data-caption="JUL 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1067-2.webp" data-webp="photos/gallery/20260704-img-1067-2.webp" data-full="photos/gallery/20260704-img-1067-2.webp" data-id="20260704-img-1067-2" data-caption="JUL 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260704-img-1071-2.webp" data-webp="photos/gallery/20260704-img-1071-2.webp" data-full="photos/gallery/20260704-img-1071-2.webp" data-id="20260704-img-1071-2" data-caption="JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260705-dscf0677-1.webp" data-webp="photos/gallery/20260705-dscf0677-1.webp" data-full="photos/gallery/20260705-dscf0677-1.webp" data-id="20260705-dscf0677-1" data-caption="Fujifilm x100vi, JUL 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1388.webp" data-webp="photos/gallery/20260708-img-1388.webp" data-full="photos/gallery/20260708-img-1388.webp" data-id="20260708-img-1388" data-caption="Film, JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510027-28a-1.webp" data-webp="photos/gallery/20260708-001076510027-28a-1.webp" data-full="photos/gallery/20260708-001076510027-28a-1.webp" data-id="20260708-001076510027-28a-1" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1384-2.webp" data-webp="photos/gallery/20260708-img-1384-2.webp" data-full="photos/gallery/20260708-img-1384-2.webp" data-id="20260708-img-1384-2" data-caption="Film, JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1119-2.webp" data-webp="photos/gallery/20260708-img-1119-2.webp" data-full="photos/gallery/20260708-img-1119-2.webp" data-id="20260708-img-1119-2" data-caption="Film, JUL 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1382-2.webp" data-webp="photos/gallery/20260708-img-1382-2.webp" data-full="photos/gallery/20260708-img-1382-2.webp" data-id="20260708-img-1382-2" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1381.webp" data-webp="photos/gallery/20260708-img-1381.webp" data-full="photos/gallery/20260708-img-1381.webp" data-id="20260708-img-1381" data-caption="Film, JUL 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510022-23a-1.webp" data-webp="photos/gallery/20260708-001076510022-23a-1.webp" data-full="photos/gallery/20260708-001076510022-23a-1.webp" data-id="20260708-001076510022-23a-1" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510021-22a-1.webp" data-webp="photos/gallery/20260708-001076510021-22a-1.webp" data-full="photos/gallery/20260708-001076510021-22a-1.webp" data-id="20260708-001076510021-22a-1" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1383.webp" data-webp="photos/gallery/20260708-img-1383.webp" data-full="photos/gallery/20260708-img-1383.webp" data-id="20260708-img-1383" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076520028-28.webp" data-webp="photos/gallery/20260708-001076520028-28.webp" data-full="photos/gallery/20260708-001076520028-28.webp" data-id="20260708-001076520028-28" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510015-16a.webp" data-webp="photos/gallery/20260708-001076510015-16a.webp" data-full="photos/gallery/20260708-001076510015-16a.webp" data-id="20260708-001076510015-16a" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510020-21a-1.webp" data-webp="photos/gallery/20260708-001076510020-21a-1.webp" data-full="photos/gallery/20260708-001076510020-21a-1.webp" data-id="20260708-001076510020-21a-1" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510012-13a.webp" data-webp="photos/gallery/20260708-001076510012-13a.webp" data-full="photos/gallery/20260708-001076510012-13a.webp" data-id="20260708-001076510012-13a" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1120.webp" data-webp="photos/gallery/20260708-img-1120.webp" data-full="photos/gallery/20260708-img-1120.webp" data-id="20260708-img-1120" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076520036-36.webp" data-webp="photos/gallery/20260708-001076520036-36.webp" data-full="photos/gallery/20260708-001076520036-36.webp" data-id="20260708-001076520036-36" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1125-2-1.webp" data-webp="photos/gallery/20260708-img-1125-2-1.webp" data-full="photos/gallery/20260708-img-1125-2-1.webp" data-id="20260708-img-1125-2-1" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076520014-14.webp" data-webp="photos/gallery/20260708-001076520014-14.webp" data-full="photos/gallery/20260708-001076520014-14.webp" data-id="20260708-001076520014-14" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260714-img-1180-2-1.webp" data-webp="photos/gallery/20260714-img-1180-2-1.webp" data-full="photos/gallery/20260714-img-1180-2-1.webp" data-id="20260714-img-1180-2-1" data-caption="JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076510008-9a.webp" data-webp="photos/gallery/20260708-001076510008-9a.webp" data-full="photos/gallery/20260708-001076510008-9a.webp" data-id="20260708-001076510008-9a" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1141-2-1.webp" data-webp="photos/gallery/20260708-img-1141-2-1.webp" data-full="photos/gallery/20260708-img-1141-2-1.webp" data-id="20260708-img-1141-2-1" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1182-2-1.webp" data-webp="photos/gallery/20260708-img-1182-2-1.webp" data-full="photos/gallery/20260708-img-1182-2-1.webp" data-id="20260708-img-1182-2-1" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-img-1132.webp" data-webp="photos/gallery/20260708-img-1132.webp" data-full="photos/gallery/20260708-img-1132.webp" data-id="20260708-img-1132" data-caption="JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260708-001076520032-32.webp" data-webp="photos/gallery/20260708-001076520032-32.webp" data-full="photos/gallery/20260708-001076520032-32.webp" data-id="20260708-001076520032-32" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261024-dscf0952-1.webp" data-webp="photos/gallery/20261024-dscf0952-1.webp" data-full="photos/gallery/20261024-dscf0952-1.webp" data-id="20261024-dscf0952-1" data-caption="Fujifilm x100vi, OCT 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-image-99.webp" data-webp="photos/gallery/20261101-image-99.webp" data-full="photos/gallery/20261101-image-99.webp" data-id="20261101-image-99" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-image-2027.webp" data-webp="photos/gallery/20261101-image-2027.webp" data-full="photos/gallery/20261101-image-2027.webp" data-id="20261101-image-2027" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-dscf1166.webp" data-webp="photos/gallery/20261101-dscf1166.webp" data-full="photos/gallery/20261101-dscf1166.webp" data-id="20261101-dscf1166" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-image-2029.webp" data-webp="photos/gallery/20261101-image-2029.webp" data-full="photos/gallery/20261101-image-2029.webp" data-id="20261101-image-2029" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-image-2030.webp" data-webp="photos/gallery/20261101-image-2030.webp" data-full="photos/gallery/20261101-image-2030.webp" data-id="20261101-image-2030" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-image-100.webp" data-webp="photos/gallery/20261101-image-100.webp" data-full="photos/gallery/20261101-image-100.webp" data-id="20261101-image-100" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260615-ct-june5.webp" data-webp="photos/gallery/20260615-ct-june5.webp" data-full="photos/gallery/20260615-ct-june5.webp" data-id="20260615-ct-june5" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260615-ct-june13.webp" data-webp="photos/gallery/20260615-ct-june13.webp" data-full="photos/gallery/20260615-ct-june13.webp" data-id="20260615-ct-june13" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260615-ct-june12.webp" data-webp="photos/gallery/20260615-ct-june12.webp" data-full="photos/gallery/20260615-ct-june12.webp" data-id="20260615-ct-june12" data-caption="Fujifilm x100vi, JUNE 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260615-ct-june3.webp" data-webp="photos/gallery/20260615-ct-june3.webp" data-full="photos/gallery/20260615-ct-june3.webp" data-id="20260615-ct-june3" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-ct-june10.webp" data-webp="photos/gallery/20260607-ct-june10.webp" data-full="photos/gallery/20260607-ct-june10.webp" data-id="20260607-ct-june10" data-caption="Fujifilm x100vi, JUNE 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260615-ct-june6.webp" data-webp="photos/gallery/20260615-ct-june6.webp" data-full="photos/gallery/20260615-ct-june6.webp" data-id="20260615-ct-june6" data-caption="Fujifilm x100vi, JUNE 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261031-dscf1103.webp" data-webp="photos/gallery/20261031-dscf1103.webp" data-full="photos/gallery/20261031-dscf1103.webp" data-id="20261031-dscf1103" data-caption="Fujifilm x100vi, OCT 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261031-dscf1101.webp" data-webp="photos/gallery/20261031-dscf1101.webp" data-full="photos/gallery/20261031-dscf1101.webp" data-id="20261031-dscf1101" data-caption="Fujifilm x100vi, OCT 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261031-dscf1102.webp" data-webp="photos/gallery/20261031-dscf1102.webp" data-full="photos/gallery/20261031-dscf1102.webp" data-id="20261031-dscf1102" data-caption="Fujifilm x100vi, OCT 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261111-dscf1209.webp" data-webp="photos/gallery/20261111-dscf1209.webp" data-full="photos/gallery/20261111-dscf1209.webp" data-id="20261111-dscf1209" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261111-dscf1208.webp" data-webp="photos/gallery/20261111-dscf1208.webp" data-full="photos/gallery/20261111-dscf1208.webp" data-id="20261111-dscf1208" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261109-dscf1181.webp" data-webp="photos/gallery/20261109-dscf1181.webp" data-full="photos/gallery/20261109-dscf1181.webp" data-id="20261109-dscf1181" data-caption="Fujifilm x100vi, NOV 2026" width="718" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0291.webp" data-webp="photos/gallery/20260517-dscf0291.webp" data-full="photos/gallery/20260517-dscf0291.webp" data-id="20260517-dscf0291" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0302.webp" data-webp="photos/gallery/20260517-dscf0302.webp" data-full="photos/gallery/20260517-dscf0302.webp" data-id="20260517-dscf0302" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0277.webp" data-webp="photos/gallery/20260517-dscf0277.webp" data-full="photos/gallery/20260517-dscf0277.webp" data-id="20260517-dscf0277" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-street3.webp" data-webp="photos/gallery/20260517-street3.webp" data-full="photos/gallery/20260517-street3.webp" data-id="20260517-street3" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0298.webp" data-webp="photos/gallery/20260517-dscf0298.webp" data-full="photos/gallery/20260517-dscf0298.webp" data-id="20260517-dscf0298" data-caption="Fujifilm x100vi, MAY 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0279.webp" data-webp="photos/gallery/20260517-dscf0279.webp" data-full="photos/gallery/20260517-dscf0279.webp" data-id="20260517-dscf0279" data-caption="Fujifilm x100vi, MAY 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0301.webp" data-webp="photos/gallery/20260517-dscf0301.webp" data-full="photos/gallery/20260517-dscf0301.webp" data-id="20260517-dscf0301" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0288.webp" data-webp="photos/gallery/20260517-dscf0288.webp" data-full="photos/gallery/20260517-dscf0288.webp" data-id="20260517-dscf0288" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0308.webp" data-webp="photos/gallery/20260517-dscf0308.webp" data-full="photos/gallery/20260517-dscf0308.webp" data-id="20260517-dscf0308" data-caption="Fujifilm x100vi, MAY 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260517-dscf0300.webp" data-webp="photos/gallery/20260517-dscf0300.webp" data-full="photos/gallery/20260517-dscf0300.webp" data-id="20260517-dscf0300" data-caption="Fujifilm x100vi, MAY 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260525-dscf0380.webp" data-webp="photos/gallery/20260525-dscf0380.webp" data-full="photos/gallery/20260525-dscf0380.webp" data-id="20260525-dscf0380" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260525-dscf0389.webp" data-webp="photos/gallery/20260525-dscf0389.webp" data-full="photos/gallery/20260525-dscf0389.webp" data-id="20260525-dscf0389" data-caption="Fujifilm x100vi, MAY 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261025-dscf0991.webp" data-webp="photos/gallery/20261025-dscf0991.webp" data-full="photos/gallery/20261025-dscf0991.webp" data-id="20261025-dscf0991" data-caption="Fujifilm x100vi, OCT 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261025-dscf0987.webp" data-webp="photos/gallery/20261025-dscf0987.webp" data-full="photos/gallery/20261025-dscf0987.webp" data-id="20261025-dscf0987" data-caption="Fujifilm x100vi, OCT 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261025-dscf0992.webp" data-webp="photos/gallery/20261025-dscf0992.webp" data-full="photos/gallery/20261025-dscf0992.webp" data-id="20261025-dscf0992" data-caption="Fujifilm x100vi, OCT 2026" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261024-dscf0965-1.webp" data-webp="photos/gallery/20261024-dscf0965-1.webp" data-full="photos/gallery/20261024-dscf0965-1.webp" data-id="20261024-dscf0965-1" data-caption="Fujifilm x100vi, OCT 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-ct-june2.webp" data-webp="photos/gallery/20260607-ct-june2.webp" data-full="photos/gallery/20260607-ct-june2.webp" data-id="20260607-ct-june2" data-caption="Fujifilm x100vi, JUNE 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-ct-june11.webp" data-webp="photos/gallery/20260607-ct-june11.webp" data-full="photos/gallery/20260607-ct-june11.webp" data-id="20260607-ct-june11" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-ct-june1.webp" data-webp="photos/gallery/20260607-ct-june1.webp" data-full="photos/gallery/20260607-ct-june1.webp" data-id="20260607-ct-june1" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-70.webp" data-webp="photos/gallery/20260930-image-70.webp" data-full="photos/gallery/20260930-image-70.webp" data-id="20260930-image-70" data-caption="SEP 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260927-dscf0815-1.webp" data-webp="photos/gallery/20260927-dscf0815-1.webp" data-full="photos/gallery/20260927-dscf0815-1.webp" data-id="20260927-dscf0815-1" data-caption="Fujifilm x100vi, SEP 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-69.webp" data-webp="photos/gallery/20260930-image-69.webp" data-full="photos/gallery/20260930-image-69.webp" data-id="20260930-image-69" data-caption="SEP 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-68.webp" data-webp="photos/gallery/20260930-image-68.webp" data-full="photos/gallery/20260930-image-68.webp" data-id="20260930-image-68" data-caption="SEP 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-race1.webp" data-webp="photos/gallery/20260607-race1.webp" data-full="photos/gallery/20260607-race1.webp" data-id="20260607-race1" data-caption="Fujifilm x100vi, JUNE 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-race6.webp" data-webp="photos/gallery/20260607-race6.webp" data-full="photos/gallery/20260607-race6.webp" data-id="20260607-race6" data-caption="Fujifilm x100vi, JUNE 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-race3.webp" data-webp="photos/gallery/20260607-race3.webp" data-full="photos/gallery/20260607-race3.webp" data-id="20260607-race3" data-caption="Fujifilm x100vi, JUNE 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260607-race9.webp" data-webp="photos/gallery/20260607-race9.webp" data-full="photos/gallery/20260607-race9.webp" data-id="20260607-race9" data-caption="Fujifilm x100vi, JUNE 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076540012-14a.webp" data-webp="photos/gallery/20261013-001076540012-14a.webp" data-full="photos/gallery/20261013-001076540012-14a.webp" data-id="20261013-001076540012-14a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076540016-18a.webp" data-webp="photos/gallery/20261013-001076540016-18a.webp" data-full="photos/gallery/20261013-001076540016-18a.webp" data-id="20261013-001076540016-18a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076530014-13a.webp" data-webp="photos/gallery/20261013-001076530014-13a.webp" data-full="photos/gallery/20261013-001076530014-13a.webp" data-id="20261013-001076530014-13a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-001076530030-30a.webp" data-webp="photos/gallery/20261013-001076530030-30a.webp" data-full="photos/gallery/20261013-001076530030-30a.webp" data-id="20261013-001076530030-30a" data-caption="Film, OCT 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260415-dscf0247.webp" data-webp="photos/gallery/20260415-dscf0247.webp" data-full="photos/gallery/20260415-dscf0247.webp" data-id="20260415-dscf0247" data-caption="Fujifilm x100vi, APR 2026" width="722" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20251115-seattle2-1.webp" data-webp="photos/gallery/20251115-seattle2-1.webp" data-full="photos/gallery/20251115-seattle2-1.webp" data-id="20251115-seattle2-1" data-caption="Fujifilm x100vi, NOV 2025" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260115-sf18.webp" data-webp="photos/gallery/20260115-sf18.webp" data-full="photos/gallery/20260115-sf18.webp" data-id="20260115-sf18" data-caption="Fujifilm x100vi, JAN 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261101-dscf1169.webp" data-webp="photos/gallery/20261101-dscf1169.webp" data-full="photos/gallery/20261101-dscf1169.webp" data-id="20261101-dscf1169" data-caption="Fujifilm x100vi, NOV 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0836.webp" data-webp="photos/gallery/20261003-dscf0836.webp" data-full="photos/gallery/20261003-dscf0836.webp" data-id="20261003-dscf0836" data-caption="Fujifilm x100vi, OCT 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-77.webp" data-webp="photos/gallery/20260930-image-77.webp" data-full="photos/gallery/20260930-image-77.webp" data-id="20260930-image-77" data-caption="SEP 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-78.webp" data-webp="photos/gallery/20260930-image-78.webp" data-full="photos/gallery/20260930-image-78.webp" data-id="20260930-image-78" data-caption="SEP 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-image-83.webp" data-webp="photos/gallery/20261003-image-83.webp" data-full="photos/gallery/20261003-image-83.webp" data-id="20261003-image-83" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="721" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0855.webp" data-webp="photos/gallery/20261003-dscf0855.webp" data-full="photos/gallery/20261003-dscf0855.webp" data-id="20261003-dscf0855" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-image-87.webp" data-webp="photos/gallery/20261003-image-87.webp" data-full="photos/gallery/20261003-image-87.webp" data-id="20261003-image-87" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="708" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0853.webp" data-webp="photos/gallery/20261003-dscf0853.webp" data-full="photos/gallery/20261003-dscf0853.webp" data-id="20261003-dscf0853" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0849.webp" data-webp="photos/gallery/20261003-dscf0849.webp" data-full="photos/gallery/20261003-dscf0849.webp" data-id="20261003-dscf0849" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-image-81.webp" data-webp="photos/gallery/20261003-image-81.webp" data-full="photos/gallery/20261003-image-81.webp" data-id="20261003-image-81" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="721" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0844.webp" data-webp="photos/gallery/20261003-dscf0844.webp" data-full="photos/gallery/20261003-dscf0844.webp" data-id="20261003-dscf0844" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0842.webp" data-webp="photos/gallery/20261003-dscf0842.webp" data-full="photos/gallery/20261003-dscf0842.webp" data-id="20261003-dscf0842" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-image-85.webp" data-webp="photos/gallery/20261003-image-85.webp" data-full="photos/gallery/20261003-image-85.webp" data-id="20261003-image-85" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="721" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-dscf0841.webp" data-webp="photos/gallery/20261003-dscf0841.webp" data-full="photos/gallery/20261003-dscf0841.webp" data-id="20261003-dscf0841" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261003-image-80.webp" data-webp="photos/gallery/20261003-image-80.webp" data-full="photos/gallery/20261003-image-80.webp" data-id="20261003-image-80" data-caption="Fujifilm x100vi, OCT 2026" width="480" height="720" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-79.webp" data-webp="photos/gallery/20260930-image-79.webp" data-full="photos/gallery/20260930-image-79.webp" data-id="20260930-image-79" data-caption="SEP 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260930-image-76.webp" data-webp="photos/gallery/20260930-image-76.webp" data-full="photos/gallery/20260930-image-76.webp" data-id="20260930-image-76" data-caption="SEP 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-95.webp" data-webp="photos/gallery/20261013-image-95.webp" data-full="photos/gallery/20261013-image-95.webp" data-id="20261013-image-95" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-93.webp" data-webp="photos/gallery/20261013-image-93.webp" data-full="photos/gallery/20261013-image-93.webp" data-id="20261013-image-93" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-88.webp" data-webp="photos/gallery/20261013-image-88.webp" data-full="photos/gallery/20261013-image-88.webp" data-id="20261013-image-88" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-90.webp" data-webp="photos/gallery/20261013-image-90.webp" data-full="photos/gallery/20261013-image-90.webp" data-id="20261013-image-90" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-89.webp" data-webp="photos/gallery/20261013-image-89.webp" data-full="photos/gallery/20261013-image-89.webp" data-id="20261013-image-89" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20261013-image-92.webp" data-webp="photos/gallery/20261013-image-92.webp" data-full="photos/gallery/20261013-image-92.webp" data-id="20261013-image-92" data-caption="OCT 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260730-image-66.webp" data-webp="photos/gallery/20260730-image-66.webp" data-full="photos/gallery/20260730-image-66.webp" data-id="20260730-image-66" data-caption="Film, JUL 2026" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260730-image-67.webp" data-webp="photos/gallery/20260730-image-67.webp" data-full="photos/gallery/20260730-image-67.webp" data-id="20260730-image-67" data-caption="Film, JUL 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260815-img-1674-2.webp" data-webp="photos/gallery/20260815-img-1674-2.webp" data-full="photos/gallery/20260815-img-1674-2.webp" data-id="20260815-img-1674-2" data-caption="AUG 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260815-img-1671-2.webp" data-webp="photos/gallery/20260815-img-1671-2.webp" data-full="photos/gallery/20260815-img-1671-2.webp" data-id="20260815-img-1671-2" data-caption="AUG 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260815-img-1679.webp" data-webp="photos/gallery/20260815-img-1679.webp" data-full="photos/gallery/20260815-img-1679.webp" data-id="20260815-img-1679" data-caption="AUG 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260815-img-1672-2.webp" data-webp="photos/gallery/20260815-img-1672-2.webp" data-full="photos/gallery/20260815-img-1672-2.webp" data-id="20260815-img-1672-2" data-caption="AUG 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260816-img-1690.webp" data-webp="photos/gallery/20260816-img-1690.webp" data-full="photos/gallery/20260816-img-1690.webp" data-id="20260816-img-1690" data-caption="AUG 2026" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260815-img-1675-2.webp" data-webp="photos/gallery/20260815-img-1675-2.webp" data-full="photos/gallery/20260815-img-1675-2.webp" data-id="20260815-img-1675-2" data-caption="AUG 2026" width="720" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20251115-seattle4.webp" data-webp="photos/gallery/20251115-seattle4.webp" data-full="photos/gallery/20251115-seattle4.webp" data-id="20251115-seattle4" data-caption="Fujifilm x100vi, NOV 2025" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20251115-seattle5.webp" data-webp="photos/gallery/20251115-seattle5.webp" data-full="photos/gallery/20251115-seattle5.webp" data-id="20251115-seattle5" data-caption="Fujifilm x100vi, NOV 2025" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260415-img-0419.webp" data-webp="photos/gallery/20260415-img-0419.webp" data-full="photos/gallery/20260415-img-0419.webp" data-id="20260415-img-0419" data-caption="NikonF3 w Kodak Tri-X 400, APR 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260415-img-0403.webp" data-webp="photos/gallery/20260415-img-0403.webp" data-full="photos/gallery/20260415-img-0403.webp" data-id="20260415-img-0403" data-caption="NikonF3 w Kodak Tri-X 400, APR 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260415-img-0401.webp" data-webp="photos/gallery/20260415-img-0401.webp" data-full="photos/gallery/20260415-img-0401.webp" data-id="20260415-img-0401" data-caption="NikonF3 w Kodak Tri-X 400, APR 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250715-eigth.webp" data-webp="photos/gallery/20250715-eigth.webp" data-full="photos/gallery/20250715-eigth.webp" data-id="20250715-eigth" data-caption="ContaxRX w Ektar100, JUL 2025" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250715-first.webp" data-webp="photos/gallery/20250715-first.webp" data-full="photos/gallery/20250715-first.webp" data-id="20250715-first" data-caption="ContaxRX w Ektar100, JUL 2025" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250715-seventh.webp" data-webp="photos/gallery/20250715-seventh.webp" data-full="photos/gallery/20250715-seventh.webp" data-id="20250715-seventh" data-caption="ContaxRX w Ektar100, JUL 2025" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250715-second.webp" data-webp="photos/gallery/20250715-second.webp" data-full="photos/gallery/20250715-second.webp" data-id="20250715-second" data-caption="ContaxRX w Ektar100, JUL 2025" width="723" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain3-1.webp" data-webp="photos/gallery/20250515-spain3-1.webp" data-full="photos/gallery/20250515-spain3-1.webp" data-id="20250515-spain3-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain4-1.webp" data-webp="photos/gallery/20250515-spain4-1.webp" data-full="photos/gallery/20250515-spain4-1.webp" data-id="20250515-spain4-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="480" height="719" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain1-1.webp" data-webp="photos/gallery/20250515-spain1-1.webp" data-full="photos/gallery/20250515-spain1-1.webp" data-id="20250515-spain1-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain2-1.webp" data-webp="photos/gallery/20250515-spain2-1.webp" data-full="photos/gallery/20250515-spain2-1.webp" data-id="20250515-spain2-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid12.webp" data-webp="photos/gallery/20250515-madrid12.webp" data-full="photos/gallery/20250515-madrid12.webp" data-id="20250515-madrid12" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="718" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid10.webp" data-webp="photos/gallery/20250515-madrid10.webp" data-full="photos/gallery/20250515-madrid10.webp" data-id="20250515-madrid10" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain6-1.webp" data-webp="photos/gallery/20250515-spain6-1.webp" data-full="photos/gallery/20250515-spain6-1.webp" data-id="20250515-spain6-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid3.webp" data-webp="photos/gallery/20250515-madrid3.webp" data-full="photos/gallery/20250515-madrid3.webp" data-id="20250515-madrid3" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid4.webp" data-webp="photos/gallery/20250515-madrid4.webp" data-full="photos/gallery/20250515-madrid4.webp" data-id="20250515-madrid4" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid1.webp" data-webp="photos/gallery/20250515-madrid1.webp" data-full="photos/gallery/20250515-madrid1.webp" data-id="20250515-madrid1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid2.webp" data-webp="photos/gallery/20250515-madrid2.webp" data-full="photos/gallery/20250515-madrid2.webp" data-id="20250515-madrid2" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid5.webp" data-webp="photos/gallery/20250515-madrid5.webp" data-full="photos/gallery/20250515-madrid5.webp" data-id="20250515-madrid5" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="718" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid6.webp" data-webp="photos/gallery/20250515-madrid6.webp" data-full="photos/gallery/20250515-madrid6.webp" data-id="20250515-madrid6" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-madrid8.webp" data-webp="photos/gallery/20250515-madrid8.webp" data-full="photos/gallery/20250515-madrid8.webp" data-id="20250515-madrid8" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20250515-spain5-1.webp" data-webp="photos/gallery/20250515-spain5-1.webp" data-full="photos/gallery/20250515-spain5-1.webp" data-id="20250515-spain5-1" data-caption="CanonSureShot90u w Kodak400Ultramax, MAY 2025" width="719" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-61.webp" data-webp="photos/gallery/20260623-image-61.webp" data-full="photos/gallery/20260623-image-61.webp" data-id="20260623-image-61" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-55.webp" data-webp="photos/gallery/20260623-image-55.webp" data-full="photos/gallery/20260623-image-55.webp" data-id="20260623-image-55" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-58.webp" data-webp="photos/gallery/20260623-image-58.webp" data-full="photos/gallery/20260623-image-58.webp" data-id="20260623-image-58" data-caption="JUN 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-59.webp" data-webp="photos/gallery/20260623-image-59.webp" data-full="photos/gallery/20260623-image-59.webp" data-id="20260623-image-59" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-60.webp" data-webp="photos/gallery/20260623-image-60.webp" data-full="photos/gallery/20260623-image-60.webp" data-id="20260623-image-60" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260623-image-54.webp" data-webp="photos/gallery/20260623-image-54.webp" data-full="photos/gallery/20260623-image-54.webp" data-id="20260623-image-54" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast3.webp" data-webp="photos/gallery/20260515-calcoast3.webp" data-full="photos/gallery/20260515-calcoast3.webp" data-id="20260515-calcoast3" data-caption="NikonF3 w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast12.webp" data-webp="photos/gallery/20260515-calcoast12.webp" data-full="photos/gallery/20260515-calcoast12.webp" data-id="20260515-calcoast12" data-caption="NikonF3 w Kodak160, MAY 2026" width="480" height="725" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast4.webp" data-webp="photos/gallery/20260515-calcoast4.webp" data-full="photos/gallery/20260515-calcoast4.webp" data-id="20260515-calcoast4" data-caption="NikonF3 w Kodak160, MAY 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur4.webp" data-webp="photos/gallery/20260515-bigsur4.webp" data-full="photos/gallery/20260515-bigsur4.webp" data-id="20260515-bigsur4" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro5.webp" data-webp="photos/gallery/20260515-morro5.webp" data-full="photos/gallery/20260515-morro5.webp" data-id="20260515-morro5" data-caption="NikonF3 w Kodak160, MAY 2026" width="728" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur2.webp" data-webp="photos/gallery/20260515-bigsur2.webp" data-full="photos/gallery/20260515-bigsur2.webp" data-id="20260515-bigsur2" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur1.webp" data-webp="photos/gallery/20260515-bigsur1.webp" data-full="photos/gallery/20260515-bigsur1.webp" data-id="20260515-bigsur1" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="480" height="725" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro4.webp" data-webp="photos/gallery/20260515-morro4.webp" data-full="photos/gallery/20260515-morro4.webp" data-id="20260515-morro4" data-caption="NikonF3 w Kodak160, MAY 2026" width="813" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast15.webp" data-webp="photos/gallery/20260515-calcoast15.webp" data-full="photos/gallery/20260515-calcoast15.webp" data-id="20260515-calcoast15" data-caption="NikonF3 w Kodak160, MAY 2026" width="480" height="724" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur6.webp" data-webp="photos/gallery/20260515-bigsur6.webp" data-full="photos/gallery/20260515-bigsur6.webp" data-id="20260515-bigsur6" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260602-image-32.webp" data-webp="photos/gallery/20260602-image-32.webp" data-full="photos/gallery/20260602-image-32.webp" data-id="20260602-image-32" data-caption="JUN 2026" width="480" height="725" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur7.webp" data-webp="photos/gallery/20260515-bigsur7.webp" data-full="photos/gallery/20260515-bigsur7.webp" data-id="20260515-bigsur7" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="480" height="726" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260601-image-6.webp" data-webp="photos/gallery/20260601-image-6.webp" data-full="photos/gallery/20260601-image-6.webp" data-id="20260601-image-6" data-caption="JUN 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast14.webp" data-webp="photos/gallery/20260515-calcoast14.webp" data-full="photos/gallery/20260515-calcoast14.webp" data-id="20260515-calcoast14" data-caption="NikonF3 w Kodak160, MAY 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260602-image-37.webp" data-webp="photos/gallery/20260602-image-37.webp" data-full="photos/gallery/20260602-image-37.webp" data-id="20260602-image-37" data-caption="JUN 2026" width="480" height="725" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-calcoast2.webp" data-webp="photos/gallery/20260515-calcoast2.webp" data-full="photos/gallery/20260515-calcoast2.webp" data-id="20260515-calcoast2" data-caption="NikonF3 w Kodak160, MAY 2026" width="480" height="724" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260601-image-18-2.webp" data-webp="photos/gallery/20260601-image-18-2.webp" data-full="photos/gallery/20260601-image-18-2.webp" data-id="20260601-image-18-2" data-caption="JUN 2026" width="725" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260601-image-17.webp" data-webp="photos/gallery/20260601-image-17.webp" data-full="photos/gallery/20260601-image-17.webp" data-id="20260601-image-17" data-caption="JUN 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260601-image-12.webp" data-webp="photos/gallery/20260601-image-12.webp" data-full="photos/gallery/20260601-image-12.webp" data-id="20260601-image-12" data-caption="JUN 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-bigsur10.webp" data-webp="photos/gallery/20260515-bigsur10.webp" data-full="photos/gallery/20260515-bigsur10.webp" data-id="20260515-bigsur10" data-caption="CanonSureShot90u w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro1.webp" data-webp="photos/gallery/20260515-morro1.webp" data-full="photos/gallery/20260515-morro1.webp" data-id="20260515-morro1" data-caption="NikonF3 w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro2.webp" data-webp="photos/gallery/20260515-morro2.webp" data-full="photos/gallery/20260515-morro2.webp" data-id="20260515-morro2" data-caption="NikonF3 w Kodak160, MAY 2026" width="781" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro3.webp" data-webp="photos/gallery/20260515-morro3.webp" data-full="photos/gallery/20260515-morro3.webp" data-id="20260515-morro3" data-caption="NikonF3 w Kodak160, MAY 2026" width="724" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-morro6.webp" data-webp="photos/gallery/20260515-morro6.webp" data-full="photos/gallery/20260515-morro6.webp" data-id="20260515-morro6" data-caption="NikonF3 w Kodak160, MAY 2026" width="727" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-hmb2.webp" data-webp="photos/gallery/20260515-hmb2.webp" data-full="photos/gallery/20260515-hmb2.webp" data-id="20260515-hmb2" data-caption="NikonF3 w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-hmb1.webp" data-webp="photos/gallery/20260515-hmb1.webp" data-full="photos/gallery/20260515-hmb1.webp" data-id="20260515-hmb1" data-caption="NikonF3 w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260515-hmb4.webp" data-webp="photos/gallery/20260515-hmb4.webp" data-full="photos/gallery/20260515-hmb4.webp" data-id="20260515-hmb4" data-caption="NikonF3 w Kodak160, MAY 2026" width="726" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260601-image-21-2.webp" data-webp="photos/gallery/20260601-image-21-2.webp" data-full="photos/gallery/20260601-image-21-2.webp" data-id="20260601-image-21-2" data-caption="JUN 2026" width="480" height="724" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20251215-sf5.webp" data-webp="photos/gallery/20251215-sf5.webp" data-full="photos/gallery/20251215-sf5.webp" data-id="20251215-sf5" data-caption="Fujifilm x100vi, DEC 2025" width="721" height="480" alt="photo" loading="lazy">
+            <img src="photos/gallery/thumbs/20260115-sf10-1.webp" data-webp="photos/gallery/20260115-sf10-1.webp" data-full="photos/gallery/20260115-sf10-1.webp" data-id="20260115-sf10-1" data-caption="Fujifilm x100vi, JAN 2026" width="721" height="480" alt="photo" loading="lazy">
     </div>
    </main>
-   <div id="lightbox"><img alt="expanded photo"></div>
+   <div id="lightbox"><img alt="expanded photo"><p></p></div>
+   <div id="orderbar"><span id="ordercount"></span><button id="orderundo">Undo</button><button id="orderclear">Clear</button><button id="ordercopy">Copy list</button></div>
    <script>
      (function () {
          var lb = document.getElementById('lightbox');
          var lbImg = lb.querySelector('img');
-         document.querySelectorAll('main img').forEach(function (img) {
-             img.addEventListener('click', function () {
-                 var full = img.getAttribute('src');
-                 lbImg.src = img.currentSrc || img.src;
-                 lbImg.dataset.full = full;
-                 lb.classList.add('open');
-                 var hi = new Image();
-                 hi.onload = function () {
-                     if (lb.classList.contains('open') && lbImg.dataset.full === full) lbImg.src = full;
-                 };
-                 hi.src = full;
+         var lbCap = lb.querySelector('p');
+         var thumbs = Array.prototype.slice.call(document.querySelectorAll('#grid img'));
+         var current = -1;
+         // show the fast version right away, then swap in the full-res original once it loads
+         function show(fast, full, caption) {
+             lbImg.src = fast;
+             lbImg.dataset.full = full;
+             lbCap.textContent = caption || '';
+             lb.classList.add('open');
+             var hi = new Image();
+             hi.onload = function () {
+                 if (lb.classList.contains('open') && lbImg.dataset.full === full) lbImg.src = full;
+             };
+             hi.src = full;
+         }
+         function showThumb(i) {
+             current = (i + thumbs.length) % thumbs.length;
+             var t = thumbs[current];
+             show(t.dataset.webp, t.dataset.full, t.dataset.caption);
+         }
+         var mode = /[?&]order\b/.test(location.search) ? 'order' : /[?&]cut\b/.test(location.search) ? 'cut' : '';
+         var ordering = mode !== '';
+         var KEY = 'photos-' + mode;
+         var seq = [];
+         function drawOrder() {
+             thumbs.forEach(function (t) {
+                 var n = seq.indexOf(t.dataset.id);
+                 t.parentNode.classList.toggle(mode === 'order' ? 'picked' : 'cut', n >= 0);
+                 t.parentNode.querySelector('b').textContent = n + 1;
              });
+             document.getElementById('ordercount').textContent = mode === 'order'
+                 ? seq.length + ' of ' + thumbs.length + ' ordered'
+                 : seq.length + ' marked to cut';
+             try { localStorage.setItem(KEY, JSON.stringify(seq)); } catch (e) {}
+         }
+         if (ordering) {
+             document.body.classList.add(mode);
+             thumbs.forEach(function (t) {
+                 var slot = document.createElement('div');
+                 slot.className = 'slot';
+                 t.parentNode.insertBefore(slot, t);
+                 slot.appendChild(t);
+                 slot.appendChild(document.createElement('b'));
+             });
+             var ids = thumbs.map(function (t) { return t.dataset.id; });
+             try {
+                 JSON.parse(localStorage.getItem(KEY) || '[]').forEach(function (id) { if (ids.indexOf(id) >= 0) seq.push(id); });
+             } catch (e) {}
+             drawOrder();
+             document.getElementById('orderundo').addEventListener('click', function () { seq.pop(); drawOrder(); });
+             document.getElementById('orderclear').addEventListener('click', function () { seq = []; drawOrder(); });
+             document.getElementById('ordercopy').addEventListener('click', function () {
+                 var btn = this;
+                 navigator.clipboard.writeText(seq.join('\n')).then(function () {
+                     btn.textContent = 'Copied';
+                     setTimeout(function () { btn.textContent = 'Copy list'; }, 1500);
+                 });
+             });
+         }
+         thumbs.forEach(function (t, i) {
+             t.addEventListener('click', function () {
+                 if (!ordering) return showThumb(i);
+                 var n = seq.indexOf(t.dataset.id);
+                 if (n >= 0) seq.splice(n, 1); else seq.push(t.dataset.id);
+                 drawOrder();
+             });
+         });
+         var hero = document.getElementById('hero-img');
+         hero.addEventListener('click', function () {
+             current = -1;
+             show(hero.currentSrc || hero.src, hero.getAttribute('src'), document.getElementById('hero-stats').textContent);
          });
          lb.addEventListener('click', function () {
              lb.classList.remove('open');
          });
          document.addEventListener('keydown', function (e) {
+             if (!lb.classList.contains('open')) return;
              if (e.key === 'Escape') lb.classList.remove('open');
+             if (current < 0) return;
+             if (e.key === 'ArrowRight') showThumb(current + 1);
+             if (e.key === 'ArrowLeft') showThumb(current - 1);
          });
      })();
    </script>
